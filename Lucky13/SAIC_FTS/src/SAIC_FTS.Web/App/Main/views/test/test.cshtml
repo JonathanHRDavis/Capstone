@@ -1,0 +1,186 @@
+﻿<div class="row clearfix" ng-controller="app.views.test as vm">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card main-content" style="display: table;">
+            <div class="header">
+                <h2>
+                    Contracts
+                </h2>
+                <ul class="header-dropdown m-r--5">
+                    <i class="fa fa-spin fa-spinner" ng-if="vm.isTableLoading"></i>
+                    <li class="dropdown">
+                        <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="material-icons">more_vert</i>
+                        </a>
+                        <ul class="dropdown-menu pull-right">
+                            <li><a href="javascript:void(0);" class="waves-effect waves-block()" ng-click="vm.refresh();"><i class="material-icons">refresh</i> @L("Refresh")</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div style="padding-left: 1.0em; padding-bottom: 1.0em; padding-right: 1.0em">
+                <br /><label style="padding-left: 1.0em;">Search: <input ng-model="searchKey"></label>              <!--searchKey is whatever text user inputs into the search bar-->
+                <button type="button" ng-click="solrSearch(); keySearched = searchKey;">Search</button>
+                <br /><label style="padding-left: 1.0em;">Filter: <input ng-model="filterKey"></label><br />        <!--filter is whatever text user inputs into the filter bar-->
+                <br /><p style="padding-left: 1.0em;">Searching For Contracts That Contain: {{keySearched}}</p>     <!--keySearched represents most recent key searched as keySearched is updated only after search button is pressed-->
+                <p style="padding-left: 1.0em;">Filtering: {{filterKey}}</p>
+                <style>
+                    th, td {
+                        border: 1px solid black;
+                        min-width: 100px;
+                        max-width: 100px;
+                        padding: 10px;
+                    }
+
+                    th {
+                        font: bold 14px arial;
+                        color: white;
+                        background-color: #0072ff;
+                        cursor: pointer;
+                        text-align: center;
+                    }
+
+                    td {
+                        font: 12px arial;
+                    }
+
+                    tr:nth-child(even) {
+                        background-color: #bdbbbb
+                    }
+
+                    tr:hover {
+                        background-color: #9a9898
+                    }
+
+                    /* thead and tbody allow fixed table headers when vertically scrolling through table and tbody gives vertical scroll bar for the table */
+                    thead {
+                        display: block;
+                        overflow: hidden;
+                    }
+
+                    tbody {
+                        display: block;
+                        height: 525px;
+                        overflow: auto;
+                    }
+                </style>
+                <!--ng-click sets whichever field the user has selected as the field to sort the table with-->
+                <!--The nested spans using ng-show hide/change the column order indicator depending on what field is selected and only that field will have an arrow-->
+                <table>
+                    <thead>
+                        <tr>
+                            <th ng-click="sortContractsBy='title'; sortReverse = !sortReverse">
+                                Contract Title<span ng-show="sortContractsBy == 'title'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='fullContractNum'; sortReverse = !sortReverse">
+                                Full Contract Number<span ng-show="sortContractsBy == 'fullContractNum'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='crn'; sortReverse = !sortReverse">
+                                CRN<span ng-show="sortContractsBy == 'crn'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='startDate'; sortReverse = !sortReverse">
+                                Start Date<span ng-show="sortContractsBy == 'startDate'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='endDate'; sortReverse = !sortReverse">
+                                End Date<span ng-show="sortContractsBy == 'endDate'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='commonName'; sortReverse = !sortReverse">
+                                Common Name<span ng-show="sortContractsBy == 'commonName'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='contractStatus'; sortReverse = !sortReverse">
+                                Contract Status<span ng-show="sortContractsBy == 'contractStatus'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='ceilingCost'; sortReverse = !sortReverse">
+                                Ceiling Cost<span ng-show="sortContractsBy == 'ceilingCost'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='ceilingFee'; sortReverse = !sortReverse">
+                                Ceiling Fee<span ng-show="sortContractsBy == 'ceilingFee'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='ceilingValue'; sortReverse = !sortReverse">
+                                Ceiling Value<span ng-show="sortContractsBy == 'ceilingValue'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='projectControlAnalyst'; sortReverse = !sortReverse">
+                                Project Control Analyst<span ng-show="sortContractsBy == 'projectControlAnalyst'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i>^</span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th style="word-wrap: break-word;" ng-click="sortContractsBy='representative'; sortReverse = !sortReverse">
+                                Representative<span ng-show="sortContractsBy == 'representative'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='laborCertificationRequired'; sortReverse = !sortReverse">
+                                Labor Certification Required<span ng-show="sortContractsBy == 'laborCertificationRequired'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='oneLaborCategoryPerPerson'; sortReverse = !sortReverse">
+                                One Labor Category Per Person<span ng-show="sortContractsBy == 'oneLaborCategoryPerPerson'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='laborCertificationResumeRequired'; sortReverse = !sortReverse">
+                                Labor Certification Resume Required<span ng-show="sortContractsBy == 'laborCertificationResumeRequired'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='orgID'; sortReverse = !sortReverse">
+                                Organization ID<span ng-show="sortContractsBy == 'orgID'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='programManager'; sortReverse = !sortReverse">
+                                Program Manager<span ng-show="sortContractsBy == 'programManager'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='customer'; sortReverse = !sortReverse">
+                                Customer<span ng-show="sortContractsBy == 'customer'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='contractType'; sortReverse = !sortReverse">
+                                Contract Type<span ng-show="sortContractsBy == 'contractType'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='exportControlLicense'; sortReverse = !sortReverse">
+                                Export Control License<span ng-show="sortContractsBy == 'exportControlLicense'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='contractRecTypeCode'; sortReverse = !sortReverse">
+                                Contract Rec Type Code<span ng-show="sortContractsBy == 'contractRecTypeCode'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='isKeyPersonnel'; sortReverse = !sortReverse">
+                                Is Key Personnel<span ng-show="sortContractsBy == 'isKeyPersonnel'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th ng-click="sortContractsBy='billingFrequency'; sortReverse = !sortReverse">
+                                Billing Frequency<span ng-show="sortContractsBy == 'billingFrequency'"><span ng-show="!sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_up</i></span><span ng-show="sortReverse"><br /><i class="material-icons" style="text-align:center; border:hidden;">keyboard_arrow_down</i></span></span>
+                            </th>
+                            <th>Contract Text</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="contract in vm.contracts | filter:filterKey | orderBy:sortContractsBy:sortReverse">
+                            <td>{{contract.title}}</td>
+                            <td>{{contract.fullContractNum}}</td>
+                            <td>{{contract.crn}}</td>
+                            <td>{{contract.startDate}}</td>
+                            <td>{{contract.endDate}}</td>
+                            <td>{{contract.commonName}}</td>
+                            <td>{{contract.contractStatus}}</td>
+                            <td>${{contract.ceilingCost}}</td>
+                            <td>${{contract.ceilingFee}}</td>
+                            <td>${{contract.ceilingValue}}</td>
+                            <td>{{contract.projectControlAnalyst}}</td>
+                            <td>{{contract.representative}}</td>
+                            <td>{{contract.laborCertificationRequired}}</td>
+                            <td>{{contract.oneLaborCategoryPerPerson}}</td>
+                            <td>{{contract.laborCertificationResumeRequired}}</td>
+                            <td>{{contract.orgID}}</td>
+                            <td>{{contract.programManager}}</td>
+                            <td>{{contract.customer}}</td>
+                            <td>{{contract.contractType}}</td>
+                            <td>{{contract.exportControlLicense}}</td>
+                            <td>{{contract.contractRecTypeCode}}</td>
+                            <td>{{contract.isKeyPersonnel}}</td>
+                            <td>{{contract.billingFrequency}}</td>
+                           <td><i class="material-icons waves-effect waves-block" style="border:hidden;" ng-click="setTitle(contract.title); getContractText(contract);">short_text</i></td>
+
+                            <!--<td class="dropdown">
+                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="material-icons">menu</i>
+                    </a>
+                    <ul class="dropdown-menu pull-right">
+                        <li><a href="javascript:void(0);" class="waves-effect waves-block" ng-click="vm.getContractText(contract)"><i class="material-icons"></i>@L("Edit")</a></li>
+                        <li><a href="javascript:void(0);" class="waves-effect waves-block" ng-click="vm.opencontractEditModal(contract)"><i class="material-icons">create</i>@L("Edit")</a></li>
+                        <li><a href="javascript:void(0);" class="waves-effect waves-block" ng-click="vm.delete(contract)"><i class="material-icons">delete_sweep</i>@L("Delete")</a></li>
+                    </ul>
+                    </td>-->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
